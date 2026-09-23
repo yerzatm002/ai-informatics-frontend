@@ -20,7 +20,10 @@ export const testApi = {
 }
 
 export const agentApi = {
-  chat: (payload) => api.post('/agent/chat', payload),
+  chat: (payload) => api.post('/agent/chat', payload,
+    {
+      timeout: 90000,
+    }),
 }
 
 export const surveyApi = {

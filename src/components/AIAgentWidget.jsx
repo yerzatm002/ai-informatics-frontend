@@ -47,9 +47,38 @@ export default function AIAgentWidget() {
         action: data.action,
         attempts: data.attempts,
       }])
-    } catch (error) {
-      setMessages((prev) => [...prev, { role: 'error', text: getErrorMessage(error, 'ЖИ-агентке қосылу мүмкін болмады') }])
-    } finally {
+      } catch (error) {
+        console.error('AI Agent error:', error)
+
+        let errorText = 'ЖИ-агентке қосылу мүмкін болмады. Қайтадан байқап көріңіз.'
+
+        if (
+          error.code === 'ECONNABORTED' ||
+          error.message?.toLowerCase().includes('timeout')
+        ) {
+          errorText =
+            'Жауап күту уақыты аяқталды. Бірнеше секундтан кейін қайта байқап көріңіз.'
+        } else if (error.response?.status === 503) {
+          errorText =
+            'ЖИ қызметі уақытша қолжетімсіз. Бірнеше секундтан кейін қайта байқап көріңіз.'
+        } else if (error.response?.status === 429) {
+          errorText =
+            'ЖИ қызметіне сұраныстар саны уақытша шектелді. Сәл кейінірек қайта байқап көріңіз.'
+        } else {
+          errorText = getErrorMessage(
+            error,
+            'ЖИ-агентке қосылу мүмкін болмады'
+          )
+        }
+
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'error',
+            text: errorText,
+          },
+        ])
+      } finally {
       setSending(false)
     }
   }
